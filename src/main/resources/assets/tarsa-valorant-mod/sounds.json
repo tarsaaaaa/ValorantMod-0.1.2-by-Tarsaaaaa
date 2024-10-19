@@ -1,0 +1,37 @@
+{
+  "jett-cloudburst-sound": {
+    "sounds": [
+      "tarsa-valorant-mod:jett/cloudburst"
+    ]
+  },
+  "jett-updraft-sound": {
+    "sounds": [
+      "tarsa-valorant-mod:jett/updraft"
+    ]
+  },
+  "jett-tailwind-charge-sound": {
+    "sounds": [
+      "tarsa-valorant-mod:jett/tailwind-charge"
+    ]
+  },
+  "jett-tailwind-timeout-sound": {
+    "sounds": [
+      "tarsa-valorant-mod:jett/tailwind-timeout"
+    ]
+  },
+  "jett-tailwind-dash-sound": {
+    "sounds": [
+      "tarsa-valorant-mod:jett/tailwind-dash"
+    ]
+  },
+  "jett-bladestorm-summon-sound": {
+    "sounds": [
+      "tarsa-valorant-mod:jett/bladestorm-summon"
+    ]
+  },
+  "jett-bladestorm-single-sound": {
+    "sounds": [
+      "tarsa-valorant-mod:jett/bladestorm-single"
+    ]
+  }
+}
