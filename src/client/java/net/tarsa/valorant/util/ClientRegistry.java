@@ -15,6 +15,7 @@ import net.tarsa.valorant.ValorantMod;
 import net.tarsa.valorant.agents.Jett;
 import net.tarsa.valorant.clientEvents.KeyBindings;
 import net.tarsa.valorant.custom.Entities;
+import net.tarsa.valorant.screens.Overlays;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -38,7 +39,8 @@ public class ClientRegistry {
         EntityRendererRegistry.register(Entities.CLOUDBURSTENTITY, FlyingItemEntityRenderer::new);
         EntityRendererRegistry.register(Entities.JETT_KNIFE_ENTITY, BladeStormRenderer::new);
         registerPlayerJoin();
-        HudRenderCallback.EVENT.register(Jett::renderTailWindBar);
+        HudRenderCallback.EVENT.register(Overlays::renderTailWindBar);
+        HudRenderCallback.EVENT.register(Overlays::renderCooldowns);
     }
 
     private static void registerPlayerJoin() {

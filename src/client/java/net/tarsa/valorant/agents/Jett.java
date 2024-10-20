@@ -22,6 +22,7 @@ import java.util.List;
 import static net.tarsa.valorant.agents.JettServer.summonedBlades;
 
 public class Jett {
+    private static final CooldownHandler cooldownHandler = new CooldownHandler();
     public static boolean TailWindActive = false;
     private static boolean BladesSummoned = false;
     public static long TailWindTimer;
@@ -31,10 +32,12 @@ public class Jett {
     public static void CloudBurst(@NotNull PlayerEntity player){
         ClientPacketHandler.summonJettCloudburst();
         JettSounds.CloudBurstSound(player);
+        cooldownHandler.setCooldown("first", 5000);
     }
     public static void Updraft(@NotNull PlayerEntity player, int intensity){
         player.addVelocity(new Vec3d(0d,1d,0d).multiply(intensity));
         JettSounds.UpdraftSound(player);
+        cooldownHandler.setCooldown("second", 5000);
     }
     public static void TailWind(@NotNull PlayerEntity player, int intensity){
         if (!TailWindActive) {
@@ -68,34 +71,8 @@ public class Jett {
                 }
             }
             TailWindActive = false;
+            cooldownHandler.setCooldown("third", 5000);
         }
-    }
-
-    public static void renderTailWindBar(DrawContext context, float tickDelta) {
-        if (!TailWindActive) {
-            return;
-        }
-
-        MinecraftClient client = MinecraftClient.getInstance();
-        if (client.player == null) {
-            return;
-        }
-
-        long elapsedTime = System.currentTimeMillis() - TailWindTimer;
-        float progress = 1.0f - (float) elapsedTime / TailWindDuration;
-        if (progress < 0) progress = 0;
-
-        int screenWidth = client.getWindow().getScaledWidth();
-        int screenHeight = client.getWindow().getScaledHeight();
-        int barWidth = 100;
-        int barHeight = 8;
-        int barX = (screenWidth - barWidth) / 2;
-        int barY = (screenHeight/2) + barHeight * 10;
-        TextRenderer renderer = MinecraftClient.getInstance().textRenderer;
-        context.drawCenteredTextWithShadow(renderer, Text.of("Press again to dash"),screenWidth / 2 , barY + barHeight + 4,0xFFFFFFFF);
-        context.fill(barX, barY, barX + barWidth, barY + barHeight, 0xFF000000);
-        int filledWidth = (int) (barWidth * progress);
-        context.fill(barX, barY, barX + filledWidth, barY + barHeight, 0xFF64C4E2);
     }
 
     public static void BladeStorm(PlayerEntity player){
@@ -110,7 +87,6 @@ public class Jett {
     }
 
     private static void summonProjectilesAroundPlayer(PlayerEntity player) {
-        World world = player.getWorld();
 
         summonedBlades.clear();
 
@@ -137,11 +113,11 @@ public class Jett {
             Vec3d playerPos = player.getPos();
             Vec3d lookDirection = player.getRotationVec(1.0F);
             blades.setPos(playerPos.x,playerPos.y + 1.5,playerPos.z);
-            blades.setVelocity(lookDirection.x, lookDirection.y, lookDirection.z, 1.0F, 0.0F); // Speed and inaccuracy
+            blades.setVelocity(lookDirection.x, lookDirection.y, lookDirection.z, 10.0F, 0.0F);
 
             if (summonedBlades.isEmpty()) {
                 BladesSummoned = false;
-                player.sendMessage(Text.literal("All projectiles launched!"), false);
+                cooldownHandler.setCooldown("ult", 5000);
             }
         }
     }

@@ -12,6 +12,7 @@ import net.tarsa.valorant.util.FileHandler;
 
 import static net.tarsa.valorant.util.ClientRegistry.*;
 public class AgentHandler {
+    private static final CooldownHandler cooldownHandler = new CooldownHandler();
     private MinecraftClient client = MinecraftClient.getInstance();
 
     public void EditAgents(String agent, String ability, int intensity){
@@ -38,26 +39,44 @@ public class AgentHandler {
     }
 
     public static void FirstAbility(PlayerEntity player){
-        switch (((AgentInfoExt) player).getAGENT().getString("agent")) {
-            case "jett" -> Jett.CloudBurst(player);
+        if (!cooldownHandler.isOnCooldown("first")){
+            switch (((AgentInfoExt) player).getAGENT().getString("agent")) {
+                case "jett" -> {
+                    Jett.CloudBurst(player);
+                }
+            }
+        }else {
+            player.sendMessage(Text.of("Ability on Cooldown."), true);
         }
     }
 
     public static void SecondAbility(PlayerEntity player, int intensity){
-        switch (((AgentInfoExt) player).getAGENT().getString("agent")) {
-            case "jett" -> Jett.Updraft(player, intensity);
+        if (!cooldownHandler.isOnCooldown("second")){
+            switch (((AgentInfoExt) player).getAGENT().getString("agent")) {
+                case "jett" -> Jett.Updraft(player, intensity);
+            }
+        }else {
+            player.sendMessage(Text.of("Ability on Cooldown."), true);
         }
     }
 
     public static void ThirdAbility(PlayerEntity player, int intensity){
-        switch (((AgentInfoExt) player).getAGENT().getString("agent")) {
-            case "jett" -> Jett.TailWind(player, intensity);
+        if (!cooldownHandler.isOnCooldown("third")){
+            switch (((AgentInfoExt) player).getAGENT().getString("agent")) {
+                case "jett" -> Jett.TailWind(player, intensity);
+            }
+        }else {
+            player.sendMessage(Text.of("Ability on Cooldown."), true);
         }
     }
 
     public static void Ult(PlayerEntity player){
-        switch (((AgentInfoExt) player).getAGENT().getString("agent")) {
-            case "jett" -> Jett.BladeStorm(player);
+        if (!cooldownHandler.isOnCooldown("ult")){
+            switch (((AgentInfoExt) player).getAGENT().getString("agent")) {
+                case "jett" -> Jett.BladeStorm(player);
+            }
+        }else {
+            player.sendMessage(Text.of("Ability on Cooldown."), true);
         }
     }
 
