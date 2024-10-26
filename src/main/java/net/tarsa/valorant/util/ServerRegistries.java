@@ -11,10 +11,12 @@ import net.tarsa.valorant.ValorantMod;
 import net.tarsa.valorant.custom.Items;
 import net.tarsa.valorant.custom.ItemsGroup;
 import net.tarsa.valorant.custom.Sounds;
+import net.tarsa.valorant.custom.commands.ValorantCommands;
 
 public class ServerRegistries {
     public static Identifier SYNC_AGENTS = new Identifier(ValorantMod.MOD_ID,"sync-valorant-agents");
     public static Identifier SELECT_AGENTS = new Identifier(ValorantMod.MOD_ID,"select-valorant-agent");
+    public static Identifier BLADESTORM_KILLED = new Identifier(ValorantMod.MOD_ID, "bladestorm-killed");
     public static Identifier VALORANT_GAMERULE_SET = new Identifier(ValorantMod.MOD_ID,"valorant-gamerule-set");
     public static Identifier VALORANT_GAMERULE_GET = new Identifier(ValorantMod.MOD_ID,"valorant-gamerule-get");
     public static Identifier EDIT_AGENTS = new Identifier(ValorantMod.MOD_ID,"edit-valorant-agents");

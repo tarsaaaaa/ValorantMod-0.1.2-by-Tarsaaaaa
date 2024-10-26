@@ -4,6 +4,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Text;
+import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.Vec3d;
 import net.tarsa.valorant.custom.Entities;
 import net.tarsa.valorant.custom.Sounds;
@@ -15,7 +16,6 @@ import java.util.List;
 
 public class JettServer {
     public static List<JettKnifeEntity> summonedBlades = new ArrayList<>();
-
     public static void summonBladeStorm(ServerPlayerEntity player, Vec3d offset) {
         JettKnifeEntity blades = new JettKnifeEntity(Entities.JETT_KNIFE_ENTITY, player.getWorld());
         Vec3d spawnPosition = player.getPos().add(offset);
@@ -33,11 +33,6 @@ public class JettServer {
         player.getWorld().spawnEntity(cloudBurst);
     }
 
-    public static void TailWindExtra(PlayerEntity player){
-        player.getWorld().playSound(player, player.getPos().x, player.getPos().y, player.getPos().z, Sounds.JETT_TAILWIND_DASH_SOUND, SoundCategory.PLAYERS, 1f, 1f);
-
-//        player.getWorld().playSound(null, player.getBlockPos(), Sounds.JETT_TAILWIND_SOUND, SoundCategory.PLAYERS, 1f, 1f);
-    }
 }
 class JettSounds{
     public static void CloudBurstSound(PlayerEntity player){

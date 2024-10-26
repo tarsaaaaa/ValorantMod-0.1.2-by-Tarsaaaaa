@@ -1,4 +1,4 @@
-package net.tarsa.valorant.util;
+package net.tarsa.valorant.custom.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -10,10 +10,13 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import net.tarsa.valorant.ValorantMod;
+import net.tarsa.valorant.util.ServerPacketHandler;
+import org.slf4j.Logger;
 
 public class ValorantCommands {
-    private static String ABILITY,AGENT,SELECTED_AGENT,VAL_GAMERULE;
-    private static Boolean RULE;
+    private static Logger logger = ValorantMod.LOGGER;
+    private static String ABILITY,AGENT,SELECTED_AGENT;
     private static int INTENSITY;
     private static final SuggestionProvider<ServerCommandSource> AGENTS_SUGGESTIONS = (context, builder) -> {
         builder.suggest("jett");
@@ -26,12 +29,10 @@ public class ValorantCommands {
         builder.suggest("reyna");
         return builder.buildFuture();
     };
-
     private static final SuggestionProvider<ServerCommandSource> VALORANT_GAMERULE_SUGGESTIONS = (context, builder) -> {
         builder.suggest("doCooldown");
         return builder.buildFuture();
     };
-
     private static final SuggestionProvider<ServerCommandSource> BOOLEAN_SUGGESTIONS = (context, builder) -> {
         builder.suggest("true");
         builder.suggest("false");
@@ -111,22 +112,24 @@ public class ValorantCommands {
 
     private static int setRule(CommandContext<ServerCommandSource> context){
         ServerPlayerEntity player = context.getSource().getPlayer();
-        VAL_GAMERULE = StringArgumentType.getString(context,"val-gamerule");
-        RULE = BoolArgumentType.getBool(context,"rule");
-        ServerPacketHandler.sendValorantGameRulePacket(player,VAL_GAMERULE,RULE);
-        player.sendMessage(Text.of("Gamerule " + VAL_GAMERULE + " is set to: " + RULE));
+        String ValRule = StringArgumentType.getString(context, "val-gamerule");
+        Boolean setRule = BoolArgumentType.getBool(context, "rule");
+        ValGameRules.setValRule(ValRule,setRule);
+        if (player!=null) {
+            player.sendMessage(Text.of("Gamerule " + ValRule + " is set to: " + setRule));
+        }
         return 0;
     }
 
     private static int getRule(CommandContext<ServerCommandSource> context){
         ServerPlayerEntity player = context.getSource().getPlayer();
-        VAL_GAMERULE = StringArgumentType.getString(context,"val-gamerule");
-        ServerPacketHandler.getValorantGameRulePacket(player,VAL_GAMERULE);
+        String ValRule = StringArgumentType.getString(context, "val-gamerule");
+        ValGameRules.getValRule(ValRule);
+        logger.info("ValRule " + ValRule + " is set to: " + ValGameRules.getValRule(ValRule));
+        if (player!=null){
+            player.sendMessage(Text.of("ValRule " + ValRule + " is set to: " + ValGameRules.getValRule(ValRule)));
+        }
         return 0;
-    }
-
-    public static void showRule(ServerPlayerEntity player, String gamerule, boolean rule){
-        player.sendMessage(Text.of("Gamerule " + gamerule + " is set to: " + rule));
     }
 
     private static int editor(CommandContext<ServerCommandSource> context){

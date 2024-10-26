@@ -4,9 +4,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.ProjectileEntityRenderer;
-import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.util.Identifier;
-import net.tarsa.valorant.custom.entities.CustomEntity;
 import net.tarsa.valorant.custom.entities.JettKnifeEntity;
 
 @Environment(EnvType.CLIENT)

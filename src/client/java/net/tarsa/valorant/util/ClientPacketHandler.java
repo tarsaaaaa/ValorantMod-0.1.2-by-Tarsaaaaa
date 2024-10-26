@@ -5,9 +5,8 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.math.Vec3d;
-import net.tarsa.valorant.ValorantMod;
 import net.tarsa.valorant.agents.AgentHandler;
-import net.tarsa.valorant.agents.CooldownHandler;
+import net.tarsa.valorant.agents.Jett;
 
 import static net.tarsa.valorant.util.ServerRegistries.*;
 
@@ -43,7 +42,7 @@ public class ClientPacketHandler {
             });
         });*/
 
-        ClientPlayNetworking.registerGlobalReceiver(VALORANT_GAMERULE_SET, ((client, handler, buf, responseSender) -> {
+        /*ClientPlayNetworking.registerGlobalReceiver(VALORANT_GAMERULE_SET, ((client, handler, buf, responseSender) -> {
             String gamerule = buf.readString(32767);
             boolean rule = buf.readBoolean();
 
@@ -62,12 +61,16 @@ public class ClientPacketHandler {
                     case "doCooldown" -> ClientPacketHandler.sendGamerule(gamerule, CooldownHandler.isDoCooldown());
                 }
             });
-        }));
+        }));*/
 
         ClientPlayNetworking.registerGlobalReceiver(SELECT_AGENTS, (client, handler, buf, responseSender)->{
             String agent = buf.readString(32767);
 
             client.execute(()-> AgentHandler.SelectAgent(agent, client.player));
+        });
+
+        ClientPlayNetworking.registerGlobalReceiver(BLADESTORM_KILLED, (client, handler, buf, responseSender)->{
+            client.execute(()-> Jett.BladeStormKill(client.player));
         });
     }
 
@@ -98,13 +101,13 @@ public class ClientPacketHandler {
         ClientPlayNetworking.send(SUMMON_JETT_CLOUDBURST, PacketByteBufs.empty());
     }
 
-    public static void sendGamerule(String gamerule, boolean rule){
+    /*public static void sendGamerule(String gamerule, boolean rule){
         PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
         buf.writeString(gamerule);
         buf.writeBoolean(rule);
 
         ClientPlayNetworking.send(VALORANT_GAMERULE_GET, buf);
-    }
+    }*/
 
     public static void summonJettBladeStorm(Vec3d offset){
         PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());

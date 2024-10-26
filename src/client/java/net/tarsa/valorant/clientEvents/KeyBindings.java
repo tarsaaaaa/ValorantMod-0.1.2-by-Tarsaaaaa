@@ -5,19 +5,16 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.text.Text;
 import net.tarsa.valorant.agents.AgentHandler;
 import net.tarsa.valorant.agents.Jett;
-import net.tarsa.valorant.agents.JettServer;
-import net.tarsa.valorant.custom.Sounds;
-import net.tarsa.valorant.util.AgentInfoExt;
-import net.tarsa.valorant.util.ClientRegistry;
+import net.tarsa.valorant.custom.commands.ValGameRules;
+import net.tarsa.valorant.util.SpecialCharactersExt;
 import org.lwjgl.glfw.GLFW;
 
 public class KeyBindings {
     private static final String VALORANT_KEY_CATEGORY = "tarsa.valorant.key.category";
 
+    private static final String LEFT_CLICK = "valorant-left-click";
     private static final String TestingKey = "valorant-testing-key";
     private static final String MainMenuKey = "valorant-main-menu-key";
     private static final String BuyMenuKey = "valorant-buy-menu-key";
@@ -28,18 +25,9 @@ public class KeyBindings {
     private static final String UtilityKey = "valorant-utility-key";
     private static final String AgentsMenuKey = "valorant-agents-menu-key";
     private static final String AgentInfoKey = "valorant-agents-info-key";
-    /*private static final String
-    private static final String
-    private static final String
-    private static final String
-    private static final String
-    private static final String
-    private static final String
-    private static final String
-    private static final String
-    private static final String*/
 
 
+    private static KeyBinding LeftKeyBind;
     private static KeyBinding TestingKeyBind;
     private static KeyBinding MainMenuKeyBind;
     private static KeyBinding BuyMenuKeyBind;
@@ -53,7 +41,14 @@ public class KeyBindings {
 
     private static void registerKeyInputs(){
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            while (LeftKeyBind.wasPressed()) {
+                AgentHandler.LeftClick(client.player);
+            }
+        });
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (TestingKeyBind.wasPressed()) {
+                PlayerEntity player = client.player;
+                System.out.println(ValGameRules.getJustKilled());
             }
         });
 
@@ -115,6 +110,14 @@ public class KeyBindings {
         });
     }
     public static void registerKeyBindings(){
+        LeftKeyBind = KeyBindingHelper.registerKeyBinding(
+                new KeyBinding(
+                        LEFT_CLICK,
+                        InputUtil.Type.MOUSE,
+                        GLFW.GLFW_MOUSE_BUTTON_1,
+                        VALORANT_KEY_CATEGORY
+                )
+        );
         TestingKeyBind = KeyBindingHelper.registerKeyBinding(
                 new KeyBinding(
                         TestingKey,

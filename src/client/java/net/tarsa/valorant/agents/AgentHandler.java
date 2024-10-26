@@ -1,45 +1,56 @@
 package net.tarsa.valorant.agents;
 
-import net.minecraft.client.MinecraftClient;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.tarsa.valorant.ValorantMod;
-import net.tarsa.valorant.mixin.client.AgentInfoMixin;
+import net.tarsa.valorant.custom.commands.ValGameRules;
 import net.tarsa.valorant.util.AgentInfoExt;
-import net.tarsa.valorant.util.ClientPacketHandler;
 import net.tarsa.valorant.util.ClientRegistry;
-import net.tarsa.valorant.util.FileHandler;
+import net.tarsa.valorant.util.CooldownHandler;
+import net.tarsa.valorant.util.SpecialCharactersExt;
 
-import static net.tarsa.valorant.util.ClientRegistry.*;
+import static net.tarsa.valorant.agents.JettServer.summonedBlades;
+
+
 public class AgentHandler {
+    public static void registerAgentStuff(){
+        Jett.positionBlades();
+        worldSync();
+    }
     private static final CooldownHandler cooldownHandler = new CooldownHandler();
-    private MinecraftClient client = MinecraftClient.getInstance();
-
-    public void EditAgents(String agent, String ability, int intensity){
-        
+    public static void SelectAgent(String agent, PlayerEntity player) {
+        NbtCompound nbt = ((AgentInfoExt)player).getAGENT();
+        nbt.putString("agent", agent);
+        player.sendMessage(Text.of("Selected agent: " + agent), true);
     }
 
-    public static void SelectAgent(String agent, PlayerEntity player){
-        ValorantMod.LOGGER.info("Setting agent for " + player.getName().getString() + ":" + agent);
-        ToSyncAgentInfo(player, agent);
+    private static void worldSync(){
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            PlayerEntity player = client.player;
+            if (player == null){
+                return;
+            }
+            if (!summonedBlades.isEmpty() && ValGameRules.getJustKilled()){
+                System.out.println("KILL");
+                switch (((AgentInfoExt) client.player).getAGENT().getString("agent")) {
+                    case "jett" -> Jett.BladeStormKill(client.player);
+                }
+            }
+        });
     }
 
-    public void UpdateAbilities(String agent, int ability){
-        switch (ability){
-            case 1 -> ABILITY_CHARGES_1++;
-            case 2 -> ABILITY_CHARGES_2++;
-            case 3 -> ABILITY_CHARGES_3++;
-            case 4 -> ULT_POINTS++;
-            default -> client.player.sendMessage(Text.of("Invalid argument."));
+    public static void LeftClick(PlayerEntity player){
+        if (cooldownHandler.isNotOnCooldown("ult") && !summonedBlades.isEmpty()){
+            switch (((AgentInfoExt) player).getAGENT().getString("agent")) {
+                case "jett" -> Jett.BladeStorm(player);
+            }
         }
     }
 
-    public static void ToSyncAgentInfo(PlayerEntity player, String agent){
-        ClientRegistry.setAgent((AgentInfoExt) player, agent);
-    }
-
     public static void FirstAbility(PlayerEntity player){
-        if (!cooldownHandler.isOnCooldown("first")){
+        if (cooldownHandler.isNotOnCooldown("first")){
             switch (((AgentInfoExt) player).getAGENT().getString("agent")) {
                 case "jett" -> {
                     Jett.CloudBurst(player);
@@ -51,7 +62,7 @@ public class AgentHandler {
     }
 
     public static void SecondAbility(PlayerEntity player, int intensity){
-        if (!cooldownHandler.isOnCooldown("second")){
+        if (cooldownHandler.isNotOnCooldown("second")){
             switch (((AgentInfoExt) player).getAGENT().getString("agent")) {
                 case "jett" -> Jett.Updraft(player, intensity);
             }
@@ -61,7 +72,7 @@ public class AgentHandler {
     }
 
     public static void ThirdAbility(PlayerEntity player, int intensity){
-        if (!cooldownHandler.isOnCooldown("third")){
+        if (cooldownHandler.isNotOnCooldown("third")){
             switch (((AgentInfoExt) player).getAGENT().getString("agent")) {
                 case "jett" -> Jett.TailWind(player, intensity);
             }
@@ -71,7 +82,7 @@ public class AgentHandler {
     }
 
     public static void Ult(PlayerEntity player){
-        if (!cooldownHandler.isOnCooldown("ult")){
+        if (cooldownHandler.isNotOnCooldown("ult")){
             switch (((AgentInfoExt) player).getAGENT().getString("agent")) {
                 case "jett" -> Jett.BladeStorm(player);
             }
@@ -79,6 +90,4 @@ public class AgentHandler {
             player.sendMessage(Text.of("Ability on Cooldown."), true);
         }
     }
-
-
 }

@@ -6,7 +6,10 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.Vec3d;
 import net.tarsa.valorant.agents.JettServer;
+import net.tarsa.valorant.custom.commands.ValorantCommands;
 import org.jetbrains.annotations.NotNull;
+
+import java.nio.Buffer;
 
 import static net.tarsa.valorant.util.ServerRegistries.*;
 
@@ -45,14 +48,14 @@ public class ServerPacketHandler {
             });
         });
 
-        ServerPlayNetworking.registerGlobalReceiver(VALORANT_GAMERULE_GET, ((server, player, handler, buf, responseSender) -> {
+        /*ServerPlayNetworking.registerGlobalReceiver(VALORANT_GAMERULE_GET, ((server, player, handler, buf, responseSender) -> {
             String gamerule = buf.readString(32767);
             boolean rule = buf.readBoolean();
 
             server.execute(()->{
                 ValorantCommands.showRule(player,gamerule,rule);
             });
-        }));
+        }));*/
     }
 
     public static void sendAgentEditPacket(ServerPlayerEntity player, String agent, String ability,int intensity){
@@ -70,7 +73,11 @@ public class ServerPacketHandler {
         ServerPlayNetworking.send(player, SELECT_AGENTS, buf);
     }
 
-    public static void sendValorantGameRulePacket(ServerPlayerEntity player, String gamerule, Boolean rule){
+    public static void sendBladeStormKilledPacket(ServerPlayerEntity player){
+        ServerPlayNetworking.send(player, BLADESTORM_KILLED, new PacketByteBuf(Unpooled.buffer()));
+    }
+
+    /*public static void sendValorantGameRulePacket(ServerPlayerEntity player, String gamerule, Boolean rule){
         PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
         buf.writeString(gamerule);
         buf.writeBoolean(rule);
@@ -83,7 +90,7 @@ public class ServerPacketHandler {
         buf.writeString(gamerule);
 
         ServerPlayNetworking.send(player, VALORANT_GAMERULE_GET, buf);
-    }
+    }*/
 
     public static void sendAgentSyncPacket(ServerPlayerEntity player, String SelectedAgent, String agent, int ability, int point,@NotNull int operation){
         PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());

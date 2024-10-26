@@ -1,34 +1,24 @@
 package net.tarsa.valorant.agents;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
-import net.tarsa.valorant.custom.Entities;
-import net.tarsa.valorant.custom.Sounds;
 import net.tarsa.valorant.custom.entities.JettKnifeEntity;
 import net.tarsa.valorant.util.ClientPacketHandler;
+import net.tarsa.valorant.util.CooldownHandler;
+import net.tarsa.valorant.util.SpecialCharactersExt;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static net.tarsa.valorant.agents.JettServer.summonedBlades;
 
 public class Jett {
     private static final CooldownHandler cooldownHandler = new CooldownHandler();
     public static boolean TailWindActive = false;
-    private static boolean BladesSummoned = false;
+    public static boolean BladesSummoned = false;
     public static long TailWindTimer;
     public static final long TailWindDuration = 7500;
 
-    int CloudBurstCharges,BladeStormState=0,TailWindCharges,UpdraftCharges,UltPoints;
     public static void CloudBurst(@NotNull PlayerEntity player){
         ClientPacketHandler.summonJettCloudburst();
         JettSounds.CloudBurstSound(player);
@@ -86,11 +76,18 @@ public class Jett {
         }
     }
 
+    public static void BladeStormKill(PlayerEntity player){
+        if (BladesSummoned) {
+            for (JettKnifeEntity knife:summonedBlades) {
+                knife.discard();
+                System.out.println("DISKARDEAD");
+            }
+            summonProjectilesAroundPlayer(player);
+        }
+    }
+
     private static void summonProjectilesAroundPlayer(PlayerEntity player) {
-
         summonedBlades.clear();
-
-        Vec3d playerPos = player.getPos();
         Vec3d[] offsets = new Vec3d[]{
                 new Vec3d(1, 0, 0),  // Right
                 new Vec3d(-1, 0, 0), // Left
@@ -102,7 +99,7 @@ public class Jett {
         for (Vec3d offset : offsets) {
             ClientPacketHandler.summonJettBladeStorm(offset);
         }
-
+        ((SpecialCharactersExt) player).setIfKilled(false);
         player.sendMessage(Text.literal("Projectiles summoned!"), false);
     }
 
@@ -120,6 +117,52 @@ public class Jett {
                 cooldownHandler.setCooldown("ult", 5000);
             }
         }
+    }
+
+    public static void positionBlades(){
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            if (!summonedBlades.isEmpty()) {
+                for (JettKnifeEntity knife : summonedBlades) {
+                    knife.setNoClip(false);
+                    knife.changeLookDirection(-client.player.getYaw(),client.player.getPitch());
+                }
+            }
+            if (!summonedBlades.isEmpty()) {
+                if (client.player==null){
+                    return;
+                }
+                float yaw = (float) Math.toRadians(-(client.player.getYaw()));
+                float pitch = (float) Math.toRadians(-(client.player.getPitch()));
+                double x = Math.sin(yaw) * Math.cos(pitch);
+                double y = Math.sin(pitch);
+                double z = Math.cos(yaw) * Math.cos(pitch);
+                double distanceOffPlayer = 1.5;
+                double offsetY = 1.0;
+                Vec3d[] offsets = new Vec3d[]{
+                        new Vec3d(x, y, z).add(0d,1d,0d),
+                        new Vec3d(x, y, z).add(1d,2d,0d),
+                        new Vec3d(x, y, z),
+                        new Vec3d(x, y, z),
+                        new Vec3d(x, y, z),
+                };
+                Vec3d[] bladePos = {client.player.getPos().add(offsets[0]),
+                        client.player.getPos().add(offsets[1]),
+                        client.player.getPos().add(offsets[2]),
+                        client.player.getPos().add(offsets[3]),
+                        client.player.getPos().add(offsets[4])
+                };
+                int a = summonedBlades.size() - 1;
+                if (a>=0) {
+                    summonedBlades.get(a).applyRotation(yaw,pitch);
+                    summonedBlades.get(a).updatePosition(bladePos[0].x,bladePos[0].y,bladePos[0].z);
+                }
+                if (a-1>=0) {
+                    double offsetX = distanceOffPlayer * Math.sin(yaw);
+                    double offsetZ = distanceOffPlayer * Math.cos(yaw);
+                    summonedBlades.get(a - 1).updatePosition(client.player.getX() + offsetX, client.player.getY() + offsetY, client.player.getZ() + offsetZ);
+                }
+            }
+        });
     }
 
 }
