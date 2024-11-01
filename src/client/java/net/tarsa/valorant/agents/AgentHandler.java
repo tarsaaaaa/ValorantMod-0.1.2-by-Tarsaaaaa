@@ -1,22 +1,21 @@
 package net.tarsa.valorant.agents;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
-import net.tarsa.valorant.ValorantMod;
 import net.tarsa.valorant.custom.commands.ValGameRules;
+import net.tarsa.valorant.custom.entities.CloudBurstEntity;
 import net.tarsa.valorant.util.AgentInfoExt;
-import net.tarsa.valorant.util.ClientRegistry;
 import net.tarsa.valorant.util.CooldownHandler;
-import net.tarsa.valorant.util.SpecialCharactersExt;
 
+import static net.tarsa.valorant.agents.JettServer.BALL;
 import static net.tarsa.valorant.agents.JettServer.summonedBlades;
 
 
 public class AgentHandler {
     public static void registerAgentStuff(){
-        Jett.positionBlades();
         worldSync();
     }
     private static final CooldownHandler cooldownHandler = new CooldownHandler();
@@ -32,8 +31,8 @@ public class AgentHandler {
             if (player == null){
                 return;
             }
+            Jett.updateOrbitingProjectiles(player);
             if (!summonedBlades.isEmpty() && ValGameRules.getJustKilled()){
-                System.out.println("KILL");
                 switch (((AgentInfoExt) client.player).getAGENT().getString("agent")) {
                     case "jett" -> Jett.BladeStormKill(client.player);
                 }
@@ -53,11 +52,34 @@ public class AgentHandler {
         if (cooldownHandler.isNotOnCooldown("first")){
             switch (((AgentInfoExt) player).getAGENT().getString("agent")) {
                 case "jett" -> {
-                    Jett.CloudBurst(player);
+                    if (!JettServer.CloudburstExists) {
+                        Jett.CloudBurst(player);
+                        JettServer.CloudburstExists = true;
+                        if (JettServer.BALL!=null) {
+                            JettServer.BALL.setDoStraight(true);
+                        }
+                    } else {
+                        if (JettServer.BALL!=null) {
+                            JettServer.BALL.setDoStraight(true);
+                        }
+                    }
                 }
             }
         }else {
             player.sendMessage(Text.of("Ability on Cooldown."), true);
+        }
+    }
+
+    public static void FirstFallBack(PlayerEntity player){
+        if (cooldownHandler.isNotOnCooldown("first")){
+            switch (((AgentInfoExt) player).getAGENT().getString("agent")) {
+                case "jett" -> {
+                    if (JettServer.CloudburstExists && JettServer.BALL != null) {
+                        JettServer.BALL.setDoStraight(false);
+                        System.out.println("get no straight");
+                    }
+                }
+            }
         }
     }
 

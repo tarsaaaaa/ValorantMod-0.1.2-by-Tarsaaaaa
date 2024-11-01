@@ -2,6 +2,7 @@ package net.tarsa.valorant.util;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.entity.FlyingItemEntityRenderer;
 import net.minecraft.util.hit.BlockHitResult;
@@ -20,8 +21,13 @@ public class ClientRegistry {
         ClientPacketHandler.registerClientPacketReceiver();
         registerPlayerJoin();
         registerRenderers();
-        Overlays.registerOverlays();
+        registerOverlays();
         AgentHandler.registerAgentStuff();
+    }
+
+    private static void registerOverlays(){
+        HudRenderCallback.EVENT.register(Overlays::renderTailWindBar);
+        HudRenderCallback.EVENT.register(Overlays::renderCooldowns);
     }
 
     private static void registerRenderers(){

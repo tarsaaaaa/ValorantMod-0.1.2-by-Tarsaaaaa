@@ -11,16 +11,15 @@ import net.minecraft.util.Identifier;
 import net.tarsa.valorant.ValorantMod;
 import net.tarsa.valorant.custom.items.CloudBurstItem;
 import net.tarsa.valorant.custom.items.JettKnifeItem;
+import net.tarsa.valorant.custom.items.TarsaValorantItem;
 
 public class Items {
-    public static final Item RUBY = registerItem("ruby", new Item(new FabricItemSettings()));
-    public static final Item RAW_RUBY = registerItem("raw_ruby", new Item(new FabricItemSettings()));
+    public static final Item TARSA_VAL_LOGO = registerItem("tarsa-valorant-item", new TarsaValorantItem(new FabricItemSettings()));
     public static final Item CloudBurstItem = registerItem("cloudburst-item", new CloudBurstItem(new FabricItemSettings()));
     public static final Item JettKnifeItem = registerItem("jett-knife-item", new JettKnifeItem(new FabricItemSettings()));
 
     private static void addItemsToIngredientItemGroup(FabricItemGroupEntries entries) {
-        entries.add(RUBY);
-        entries.add(RAW_RUBY);
+
     }
     private static Item registerItem(String name, Item item) {
         return Registry.register(Registries.ITEM, new Identifier(ValorantMod.MOD_ID, name), item);
@@ -28,7 +27,6 @@ public class Items {
 
     public static void registerModItems() {
         ValorantMod.LOGGER.info("Registering Mod Items for " + ValorantMod.MOD_ID);
-
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.INGREDIENTS).register(Items::addItemsToIngredientItemGroup);
     }
 }

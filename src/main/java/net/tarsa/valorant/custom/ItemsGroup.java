@@ -11,11 +11,9 @@ import net.tarsa.valorant.ValorantMod;
 
 public class ItemsGroup {
     public static final ItemGroup RUBY_GROUP = Registry.register(Registries.ITEM_GROUP,
-            new Identifier(ValorantMod.MOD_ID, "ruby"),
-            FabricItemGroup.builder().displayName(Text.translatable("itemgroup.ruby"))
-                    .icon(() -> new ItemStack(Items.RUBY)).entries((displayContext, entries) -> {
-                        entries.add(Items.RUBY);
-                        entries.add(Items.RAW_RUBY);
+            new Identifier(ValorantMod.MOD_ID, "valorant"),
+            FabricItemGroup.builder().displayName(Text.translatable("itemgroup.valorant"))
+                    .icon(() -> new ItemStack(Items.TARSA_VAL_LOGO)).entries((displayContext, entries) -> {
                         entries.add(Items.CloudBurstItem);
                         entries.add(Items.JettKnifeItem);
                     }).build());

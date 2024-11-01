@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(PlayerEntity.class)
 public abstract class JustKilledMixin extends LivingEntity implements SpecialCharactersExt {
-    private Boolean JUST_KILLED;
+    private Boolean JUST_KILLED = false;
 
     protected JustKilledMixin(EntityType<? extends LivingEntity> entityType, World world) {
         super(entityType, world);

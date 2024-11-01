@@ -4,7 +4,9 @@ import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
 import net.tarsa.valorant.agents.AgentHandler;
 import net.tarsa.valorant.agents.Jett;
 
@@ -65,8 +67,9 @@ public class ClientPacketHandler {
 
         ClientPlayNetworking.registerGlobalReceiver(SELECT_AGENTS, (client, handler, buf, responseSender)->{
             String agent = buf.readString(32767);
-
-            client.execute(()-> AgentHandler.SelectAgent(agent, client.player));
+            if (client.player != null) {
+                client.execute(() -> AgentHandler.SelectAgent(agent, client.player));
+            }
         });
 
         ClientPlayNetworking.registerGlobalReceiver(BLADESTORM_KILLED, (client, handler, buf, responseSender)->{

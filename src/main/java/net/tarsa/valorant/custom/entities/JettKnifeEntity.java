@@ -4,15 +4,23 @@ import net.minecraft.entity.*;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
+import net.minecraft.entity.projectile.PersistentProjectileEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.entity.projectile.thrown.ThrownItemEntity;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtHelper;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.potion.Potions;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.sound.SoundEvent;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -25,15 +33,9 @@ import net.tarsa.valorant.custom.Items;
 import net.tarsa.valorant.util.ServerPacketHandler;
 import net.tarsa.valorant.util.ServerRegistries;
 
+import java.util.Objects;
+
 public class JettKnifeEntity extends ArrowEntity {
-    private static Boolean connectedToPlayer;
-    public static void setConnectedToPlayer(Boolean bool){
-        connectedToPlayer = bool;
-    }
-    public static void onConnectionToPlayer(){
-
-    }
-
     public JettKnifeEntity(EntityType<? extends ArrowEntity> entityType, World world) {
         super(entityType, world);
         this.setNoGravity(true);
@@ -41,6 +43,9 @@ public class JettKnifeEntity extends ArrowEntity {
 
     public void tick() {
         super.tick();
+        if (this.inGround) {
+            this.inGround = false;
+        }
     }
 
     @Override
@@ -104,5 +109,13 @@ public class JettKnifeEntity extends ArrowEntity {
 
     public void applyRotation(float yaw, float pitch){
         this.setRotation(yaw, pitch);
+    }
+
+    public void writeCustomDataToNbt(NbtCompound nbt) {
+        super.writeCustomDataToNbt(nbt);
+    }
+
+    public void readCustomDataFromNbt(NbtCompound nbt) {
+        super.readCustomDataFromNbt(nbt);
     }
 }

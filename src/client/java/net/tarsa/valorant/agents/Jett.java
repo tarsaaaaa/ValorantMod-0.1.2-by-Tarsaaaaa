@@ -1,9 +1,12 @@
 package net.tarsa.valorant.agents;
 
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
 import net.tarsa.valorant.custom.entities.JettKnifeEntity;
 import net.tarsa.valorant.util.ClientPacketHandler;
 import net.tarsa.valorant.util.CooldownHandler;
@@ -80,7 +83,6 @@ public class Jett {
         if (BladesSummoned) {
             for (JettKnifeEntity knife:summonedBlades) {
                 knife.discard();
-                System.out.println("DISKARDEAD");
             }
             summonProjectilesAroundPlayer(player);
         }
@@ -99,18 +101,20 @@ public class Jett {
         for (Vec3d offset : offsets) {
             ClientPacketHandler.summonJettBladeStorm(offset);
         }
+
         ((SpecialCharactersExt) player).setIfKilled(false);
-        player.sendMessage(Text.literal("Projectiles summoned!"), false);
     }
 
     private static void launchProjectileTowardsCrosshair(PlayerEntity player) {
         if (!summonedBlades.isEmpty()) {
             JettKnifeEntity blades = summonedBlades.remove(0);
 
+
             Vec3d playerPos = player.getPos();
             Vec3d lookDirection = player.getRotationVec(1.0F);
             blades.setPos(playerPos.x,playerPos.y + 1.5,playerPos.z);
             blades.setVelocity(lookDirection.x, lookDirection.y, lookDirection.z, 10.0F, 0.0F);
+
 
             if (summonedBlades.isEmpty()) {
                 BladesSummoned = false;
@@ -119,50 +123,62 @@ public class Jett {
         }
     }
 
-    public static void positionBlades(){
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if (!summonedBlades.isEmpty()) {
-                for (JettKnifeEntity knife : summonedBlades) {
-                    knife.setNoClip(false);
-                    knife.changeLookDirection(-client.player.getYaw(),client.player.getPitch());
+    public static void updateOrbitingProjectiles(PlayerEntity player) {
+        for (JettKnifeEntity projectile : summonedBlades) {
+            double offsetRight = 1.5;
+            double offsetY = 1.0;
+
+            float playerYawRadians = player.getYaw() * 0.0174533F;
+            double offsetX = -offsetRight * Math.sin(playerYawRadians);
+            double offsetZ = offsetRight * Math.cos(playerYawRadians);
+
+            projectile.updatePosition(player.getX() + offsetX, player.getY() + offsetY, player.getZ() + offsetZ);
+        }
+    }
+
+    public void createRotatingAshParticleSphere(World world, BlockPos center, int radius) {
+        if (!world.isClient) {
+            return; // Particles should only be handled on the client side
+        }
+
+        int particleCount = 100; // Total number of particles to simulate the sphere
+        double angleIncrement = 2 * Math.PI / particleCount; // Angle increment for each particle
+        float rotationSpeed = 0.05f; // Rotation speed (adjust as needed)
+
+        // Use a task scheduler or tick event to continuously rotate the particles
+        MinecraftClient.getInstance().execute(() -> {
+            for (int tick = 0; tick < 200; tick++) { // Run for 200 ticks (10 seconds)
+                final double currentAngle = tick * rotationSpeed; // Current rotation angle
+
+                for (int i = 0; i < particleCount; i++) {
+                    // Calculate the spherical coordinates
+                    double theta = i * angleIncrement; // Horizontal angle
+                    double phi = Math.acos(2 * i / (double) particleCount - 1); // Vertical angle
+
+                    // Convert spherical coordinates to Cartesian coordinates
+                    double x = radius * Math.sin(phi) * Math.cos(theta);
+                    double y = radius * Math.sin(phi) * Math.sin(theta);
+                    double z = radius * Math.cos(phi);
+
+                    // Rotate around the Y-axis
+                    double rotatedX = x * Math.cos(currentAngle) - z * Math.sin(currentAngle);
+                    double rotatedZ = x * Math.sin(currentAngle) + z * Math.cos(currentAngle);
+
+                    // Spawn the particle at the new position
+                    double particleX = center.getX() + 0.5 + rotatedX;
+                    double particleY = center.getY() + 0.5 + y;
+                    double particleZ = center.getZ() + 0.5 + rotatedZ;
+
+                    world.addParticle(ParticleTypes.ASH, true, particleX, particleY, particleZ, 0.0, 0.0, 0.0);
                 }
-            }
-            if (!summonedBlades.isEmpty()) {
-                if (client.player==null){
-                    return;
-                }
-                float yaw = (float) Math.toRadians(-(client.player.getYaw()));
-                float pitch = (float) Math.toRadians(-(client.player.getPitch()));
-                double x = Math.sin(yaw) * Math.cos(pitch);
-                double y = Math.sin(pitch);
-                double z = Math.cos(yaw) * Math.cos(pitch);
-                double distanceOffPlayer = 1.5;
-                double offsetY = 1.0;
-                Vec3d[] offsets = new Vec3d[]{
-                        new Vec3d(x, y, z).add(0d,1d,0d),
-                        new Vec3d(x, y, z).add(1d,2d,0d),
-                        new Vec3d(x, y, z),
-                        new Vec3d(x, y, z),
-                        new Vec3d(x, y, z),
-                };
-                Vec3d[] bladePos = {client.player.getPos().add(offsets[0]),
-                        client.player.getPos().add(offsets[1]),
-                        client.player.getPos().add(offsets[2]),
-                        client.player.getPos().add(offsets[3]),
-                        client.player.getPos().add(offsets[4])
-                };
-                int a = summonedBlades.size() - 1;
-                if (a>=0) {
-                    summonedBlades.get(a).applyRotation(yaw,pitch);
-                    summonedBlades.get(a).updatePosition(bladePos[0].x,bladePos[0].y,bladePos[0].z);
-                }
-                if (a-1>=0) {
-                    double offsetX = distanceOffPlayer * Math.sin(yaw);
-                    double offsetZ = distanceOffPlayer * Math.cos(yaw);
-                    summonedBlades.get(a - 1).updatePosition(client.player.getX() + offsetX, client.player.getY() + offsetY, client.player.getZ() + offsetZ);
+
+                // Add a short delay between rotations to simulate smooth animation
+                try {
+                    Thread.sleep(50); // 50ms delay
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             }
         });
     }
-
 }

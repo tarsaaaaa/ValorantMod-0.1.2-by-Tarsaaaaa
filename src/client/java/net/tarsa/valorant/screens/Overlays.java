@@ -1,6 +1,5 @@
 package net.tarsa.valorant.screens;
 
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
@@ -10,11 +9,6 @@ import net.tarsa.valorant.util.CooldownHandler;
 import static net.tarsa.valorant.agents.Jett.*;
 
 public class Overlays {
-    public static void registerOverlays(){
-        HudRenderCallback.EVENT.register(Overlays::renderTailWindBar);
-        HudRenderCallback.EVENT.register(Overlays::renderCooldowns);
-    }
-
     static MinecraftClient client = MinecraftClient.getInstance();
     static TextRenderer renderer = MinecraftClient.getInstance().textRenderer;
 

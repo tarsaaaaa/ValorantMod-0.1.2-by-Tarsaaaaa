@@ -8,7 +8,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.tarsa.valorant.agents.AgentHandler;
 import net.tarsa.valorant.agents.Jett;
 import net.tarsa.valorant.custom.commands.ValGameRules;
-import net.tarsa.valorant.util.SpecialCharactersExt;
+import net.tarsa.valorant.screens.AgentEditor;
+import net.tarsa.valorant.util.AgentInfoExt;
 import org.lwjgl.glfw.GLFW;
 
 public class KeyBindings {
@@ -48,7 +49,7 @@ public class KeyBindings {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (TestingKeyBind.wasPressed()) {
                 PlayerEntity player = client.player;
-                System.out.println(ValGameRules.getJustKilled());
+                client.setScreen(new AgentEditor(new AgentEditor.AgentEditorGUI()));
             }
         });
 
@@ -65,8 +66,21 @@ public class KeyBindings {
         });
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            if (client.player==null) {
+                return;
+            }
+
+            /*if (Ability1KeyBind.isPressed()) {
+                AgentHandler.FirstAbility(client.player);
+            } else {
+                AgentHandler.FirstFallBack(client.player);
+            }*/
+
             while (Ability1KeyBind.wasPressed()) {
                 AgentHandler.FirstAbility(client.player);
+            }
+            while (!Ability1KeyBind.wasPressed()){
+                AgentHandler.FirstFallBack(client.player);
             }
         });
 

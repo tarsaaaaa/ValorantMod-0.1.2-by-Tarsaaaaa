@@ -5,7 +5,6 @@
 	"mixins": [
 		"ExampleMixin",
 		"AgentInfoMixin",
-		"OnDeath",
 		"JustKilledMixin"
 	],
 	"injectors": {
