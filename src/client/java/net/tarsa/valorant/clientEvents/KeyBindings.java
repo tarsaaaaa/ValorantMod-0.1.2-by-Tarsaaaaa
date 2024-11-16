@@ -49,7 +49,6 @@ public class KeyBindings {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (TestingKeyBind.wasPressed()) {
                 PlayerEntity player = client.player;
-                client.setScreen(new AgentEditor(new AgentEditor.AgentEditorGUI()));
             }
         });
 
